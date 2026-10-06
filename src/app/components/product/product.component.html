@@ -1,0 +1,46 @@
+<h2>Add Product</h2>
+
+<div>
+    <label for="name">Product Name:</label>
+    <input type="text" [(ngModel)]="name" name="name">
+</div>
+<div>
+    <label for="price">Price:</label>
+    <input type="number" [(ngModel)]="price", name="price">
+</div>
+<div>
+    <label for="category">Category:</label>
+    <input type="text" [(ngModel)]="category" name="category">
+</div>
+
+@if(selectedProductId === null){
+<button (click)="addProduct()">Add Product</button>
+} @else {
+    <button (click) = "updateProduct()">Update Product</button>
+}
+<hr>
+
+<h2>Products</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for(product of products; track product.id){
+            <tr>
+                <td>{{product.name}}</td>
+                <td>{{product.price}}</td>
+                <td>{{product.category}}</td>
+                <td>
+                    <button (click)="editProduct(product)">Edit</button>
+                    <button (click)="deleteProduct(product.id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
