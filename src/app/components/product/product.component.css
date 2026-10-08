@@ -1,0 +1,17 @@
+.card {
+  border: none;
+  border-radius: 12px;
+}
+
+.card-header {
+  background-color: #ffffff;
+  padding: 20px;
+}
+
+.card-body {
+  padding: 25px;
+}
+
+.form-label {
+  font-weight: 600;
+}
