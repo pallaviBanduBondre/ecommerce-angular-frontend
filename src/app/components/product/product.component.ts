@@ -1,8 +1,15 @@
+
 import { Component, OnInit } from '@angular/core';
 import { Product } from '../../models/product';
 import { ProductService } from '../../services/product.service';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 import { ProductRequest } from '../../models/product-request';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-product',
@@ -12,16 +19,18 @@ import { ProductRequest } from '../../models/product-request';
   styleUrl: './product.component.css'
 })
 export class ProductComponent implements OnInit {
+
   products: Product[] = [];
 
   productForm = new FormGroup({
-
     name: new FormControl('', [
-      Validators.required, Validators.minLength(3)
+      Validators.required,
+      Validators.minLength(3)
     ]),
 
     price: new FormControl(0, [
-      Validators.required, Validators.min(1)
+      Validators.required,
+      Validators.min(1)
     ]),
 
     category: new FormControl('', [
@@ -30,9 +39,11 @@ export class ProductComponent implements OnInit {
   });
 
   selectedProductId: string | null = null;
-  errorMessage : String = '';
 
-  constructor(private productService: ProductService) { }
+  constructor(
+    private productService: ProductService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.loadProducts();
@@ -42,17 +53,20 @@ export class ProductComponent implements OnInit {
     this.productService.getProducts().subscribe({
       next: (data) => {
         this.products = data;
-        this.errorMessage = '';
-        console.log("Products from backend ", data);
-
+        console.log('Products from backend:', data);
       },
+
       error: (error) => {
         console.error('Error loading products:', error);
-        if(error.status === 0){
-          this.errorMessage = 'Unable to connect to server.';
 
-        }else {
-          this.errorMessage = 'Unable to load products.';
+        if (error.status === 0) {
+          this.notificationService.showError(
+            'Unable to connect to server.'
+          );
+        } else {
+          this.notificationService.showError(
+            'Unable to load products.'
+          );
         }
       }
     });
@@ -61,7 +75,7 @@ export class ProductComponent implements OnInit {
   addProduct(): void {
 
     if (this.productForm.invalid) {
-      this.productForm.markAsTouched();
+      this.productForm.markAllAsTouched();
       return;
     }
 
@@ -73,34 +87,56 @@ export class ProductComponent implements OnInit {
 
     this.productService.addProduct(newProduct).subscribe({
       next: (product) => {
-        console.log('Product added :', product);
+        console.log('Product added:', product);
+
+        this.notificationService.showSuccess(
+          'Product added successfully!'
+        );
+
         this.loadProducts();
+
         this.productForm.reset({
           name: '',
           price: 0,
           category: ''
         });
-
       },
+
       error: (error) => {
-        console.error("Error adding product :", error);
+        console.error('Error adding product:', error);
+
+        this.notificationService.showError(
+          'Failed to add product. Please try again.'
+        );
       }
     });
   }
 
   deleteProduct(id: string): void {
+
     this.productService.deleteProduct(id).subscribe({
       next: () => {
-        console.log('product deleted successfully');
+        console.log('Product deleted successfully');
+
+        this.notificationService.showSuccess(
+          'Product deleted successfully!'
+        );
+
         this.loadProducts();
       },
+
       error: (error) => {
-        console.error("Error deleting product:", error);
+        console.error('Error deleting product:', error);
+
+        this.notificationService.showError(
+          'Unable to delete product.'
+        );
       }
     });
   }
 
   editProduct(product: Product): void {
+
     this.selectedProductId = product.id;
 
     this.productForm.patchValue({
@@ -115,10 +151,12 @@ export class ProductComponent implements OnInit {
     if (this.selectedProductId === null) {
       return;
     }
+
     if (this.productForm.invalid) {
       this.productForm.markAllAsTouched();
       return;
     }
+
     const updatedProduct: ProductRequest = {
       name: this.productForm.value.name!,
       price: this.productForm.value.price!,
@@ -129,19 +167,30 @@ export class ProductComponent implements OnInit {
       .updateProduct(this.selectedProductId, updatedProduct)
       .subscribe({
         next: (product) => {
-          console.log("product updated: ", product);
+          console.log('Product updated:', product);
+
+          this.notificationService.showSuccess(
+            'Product updated successfully!'
+          );
 
           this.loadProducts();
+
           this.productForm.reset({
             name: '',
             price: 0,
             category: ''
-          })
+          });
+
+          this.selectedProductId = null;
         },
+
         error: (error) => {
           console.error('Error updating product:', error);
+
+          this.notificationService.showError(
+            'Failed to update product. Please try again.'
+          );
         }
       });
   }
-
 }
