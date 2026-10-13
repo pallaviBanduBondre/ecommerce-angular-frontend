@@ -1,0 +1,20 @@
+@if (notification$ | async; as notification) {
+
+  <div
+    class="alert"
+    [class.alert-success]="notification.type === 'success'"
+    [class.alert-danger]="notification.type === 'error'"
+    role="alert">
+
+    {{ notification.text }}
+
+    <button
+      type="button"
+      class="btn-close float-end"
+      aria-label="Close"
+      (click)="closeNotification()">
+    </button>
+
+  </div>
+
+}
